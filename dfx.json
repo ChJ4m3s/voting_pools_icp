@@ -4,15 +4,6 @@
       "candid": "src/decade_backend/decade_backend.did",
       "package": "decade_backend",
       "type": "rust"
-    },
-    "decade_frontend": {
-      "dependencies": [
-        "decade_backend"
-      ],
-      "source": [
-        "src/decade_frontend/assets"
-      ],
-      "type": "assets"
     }
   },
   "defaults": {

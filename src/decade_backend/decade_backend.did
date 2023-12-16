@@ -1,3 +1,29 @@
+type Error = variant {
+  AlreadyVoted : record { msg : text };
+  NotFound : record { msg : text };
+  NotValidVote : record { msg : text };
+};
+type Pool = record {
+  id : nat64;
+  title : text;
+  votes : int;
+  description : text;
+  created_at : nat64;
+  created_by : principal;
+  votes_vec : vec principal;
+};
+type PoolInput = record { title : text; description : text };
+type PoolResult = record {
+  id : nat64;
+  title : text;
+  votes : int;
+  description : text;
+  created_at : nat64;
+  created_by : principal;
+};
+type Result = variant { Ok : PoolResult; Err : Error };
 service : {
-    "greet": (text) -> (text) query;
+  create_pool : (PoolInput) -> (opt Pool);
+  get_pool_result : (nat64) -> (Result) query;
+  vote_pool : (nat64, int8) -> (Result);
 }
