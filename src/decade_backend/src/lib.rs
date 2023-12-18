@@ -24,16 +24,15 @@ struct Pool {
 
 
 #[derive(CandidType, Clone, Serialize, Deserialize)]
-struct PoolInput {
-    title: String,
-    description: String,
+struct PoolInput<'a> {
+    title: Cow<'a, str>,
+    description: Cow<'a, str>,
 }
 
 impl Storable for Pool {
     fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
         Cow::Owned(Encode!(self).unwrap())
     }
-
     fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
         Decode!(bytes.as_ref(), Self).unwrap()
     }
@@ -48,12 +47,10 @@ thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
         MemoryManager::init(DefaultMemoryImpl::default())
     );
-
     static ID_COUNTER: RefCell<IdCell> = RefCell::new(
         IdCell::init(MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))), 0)
             .expect("Cannot create a counter")
     );
-
     static POOL_STORAGE: RefCell<StableBTreeMap<u64, Pool, Memory>> = RefCell::new(StableBTreeMap::init(
         MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(1)))
     ));
@@ -106,14 +103,17 @@ fn create_pool(pool: PoolInput) -> Option<Pool> {
         created_at: time(),
         votes: 0,
         votes_vec: vec![],
-        created_by:  ic_cdk::caller(),
+        created_by: ic_cdk::caller(),
     };
-    do_insert(&pool);
+    do_insert(&pool).ok()?;
     Some(pool)
 }
 
-fn do_insert(message: &Pool) {
-    POOL_STORAGE.with(|service| service.borrow_mut().insert(message.id, message.clone()));
+fn do_insert(message: &Pool) -> Result<(), Error> {
+    POOL_STORAGE.with(|service| {
+        service.borrow_mut().insert(message.id, message);
+        Ok(())
+    })
 }
 
 #[ic_cdk::update]
@@ -128,7 +128,6 @@ fn vote_pool(pool_id: u64, vote: i8) -> Result<PoolResult, Error> {
                 })
             } else {
                 let already_voted = pool.votes_vec.iter().any(|voter| *voter == ic_cdk::caller());
-
                 if !already_voted {
                     pool.votes += vote as i128;
                     pool.votes_vec.push(ic_cdk::caller());
@@ -153,7 +152,7 @@ fn vote_pool(pool_id: u64, vote: i8) -> Result<PoolResult, Error> {
         },
         None => Err(Error::NotFound {
             msg: format!(
-                "could't update a pool with id={}. message not found", pool_id
+                "couldn't update a pool with id={}. message not found", pool_id
             ),
         }),
     }
