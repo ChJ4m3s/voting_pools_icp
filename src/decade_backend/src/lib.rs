@@ -108,7 +108,7 @@ fn create_pool(pool: PoolInput) -> Option<Pool> {
         votes_vec: vec![],
         created_by:  ic_cdk::caller(),
     };
-    do_insert(&pool);
+    do_insert(&pool).ok()?;
     Some(pool)
 }
 
