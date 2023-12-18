@@ -112,8 +112,11 @@ fn create_pool(pool: PoolInput) -> Option<Pool> {
     Some(pool)
 }
 
-fn do_insert(message: &Pool) {
-    POOL_STORAGE.with(|service| service.borrow_mut().insert(message.id, message.clone()));
+fn do_insert(message: &Pool) -> Result<(), Error> {
+    POOL_STORAGE.with(|service| {
+        service.borrow_mut().insert(message.id, message);
+        Ok(())
+    })
 }
 
 #[ic_cdk::update]
