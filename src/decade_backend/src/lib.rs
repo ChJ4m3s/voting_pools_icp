@@ -24,9 +24,9 @@ struct Pool {
 
 
 #[derive(CandidType, Clone, Serialize, Deserialize)]
-struct PoolInput {
-    title: String,
-    description: String,
+struct PoolInput<'a> {
+    title: Cow<'a, str>,
+    description: Cow<'a, str>,
 }
 
 impl Storable for Pool {
