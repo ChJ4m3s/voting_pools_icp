@@ -1,29 +1,59 @@
+type CategoryResult = record { id : nat64; category : SimpleInput };
+type Comment = record {
+  created_at : nat64;
+  author : principal;
+  comment : text;
+};
 type Error = variant {
   AlreadyVoted : record { msg : text };
   NotFound : record { msg : text };
   NotValidVote : record { msg : text };
 };
-type Pool = record {
+type Poll = record {
   id : nat64;
   title : text;
   votes : int;
   description : text;
   created_at : nat64;
   created_by : principal;
+  category : nat64;
   votes_vec : vec principal;
+  comments : vec Comment;
+  expiring_date : nat64;
 };
-type PoolInput = record { title : text; description : text };
-type PoolResult = record {
+type PollResult = record {
   id : nat64;
   title : text;
   votes : int;
   description : text;
   created_at : nat64;
   created_by : principal;
+  expiring_date : nat64;
 };
-type Result = variant { Ok : PoolResult; Err : Error };
+type Result = variant { Ok : PollResult; Err : Error };
+type Result_1 = variant { Ok : CategoryResult; Err : Error };
+type Result_2 = variant { Ok : vec Comment; Err : Error };
+type SearchFilter = record {
+  title : opt text;
+  max_votes : opt int;
+  min_votes : opt int;
+  description : opt text;
+  max_created_at : opt nat64;
+  created_by : opt principal;
+  expiring_before : opt nat64;
+  category : opt nat64;
+  expiring_after : opt nat64;
+  min_created_at : opt nat64;
+};
+type SimpleInput = record { title : text; description : text };
 service : {
-  create_pool : (PoolInput) -> (opt Pool);
-  get_pool_result : (nat64) -> (Result) query;
-  vote_pool : (nat64, int8) -> (Result);
+  add_category : (SimpleInput) -> (opt CategoryResult);
+  add_comment : (nat64, text) -> (Result);
+  create_poll : (SimpleInput, nat64, nat64) -> (opt Poll);
+  get_categories : () -> (vec CategoryResult) query;
+  get_category : (nat64) -> (Result_1) query;
+  get_comments : (nat64) -> (Result_2) query;
+  get_poll_result : (nat64) -> (Result) query;
+  get_polls : (SearchFilter) -> (vec Poll) query;
+  vote_poll : (nat64, int8) -> (Result);
 }
