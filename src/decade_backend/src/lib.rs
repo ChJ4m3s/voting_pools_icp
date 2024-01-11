@@ -98,16 +98,16 @@ thread_local! {
     );
 
     static POLL_STORAGE: RefCell<StableBTreeMap<u64, Poll, Memory>> = RefCell::new(StableBTreeMap::init(
-        MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(1)))
+        MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0)))
     ));
 
     static ID_COUNTER_CATEGORIES: RefCell<IdCell> = RefCell::new(
-        IdCell::init(MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))), 2)
+        IdCell::init(MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))), 0)
             .expect("Cannot create a counter")
     );
 
     static CATEGORIES: RefCell<StableBTreeMap<u64, SimpleInput, Memory>> = RefCell::new(StableBTreeMap::init(
-        MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(3)))
+        MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0)))
     ));
 }
 
