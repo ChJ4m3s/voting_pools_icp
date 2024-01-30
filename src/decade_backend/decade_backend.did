@@ -31,8 +31,9 @@ type PollResult = record {
   expiring_date : nat64;
 };
 type Result = variant { Ok : PollResult; Err : Error };
-type Result_1 = variant { Ok : CategoryResult; Err : Error };
-type Result_2 = variant { Ok : vec Comment; Err : Error };
+type Result_1 = variant { Ok : Poll; Err : Error };
+type Result_2 = variant { Ok : CategoryResult; Err : Error };
+type Result_3 = variant { Ok : vec Comment; Err : Error };
 type SearchFilter = record {
   title : opt text;
   max_votes : opt int;
@@ -49,10 +50,10 @@ type SimpleInput = record { title : text; description : text };
 service : {
   add_category : (SimpleInput) -> (opt CategoryResult);
   add_comment : (nat64, text) -> (Result);
-  create_poll : (SimpleInput, nat64, nat64) -> (opt Poll);
+  create_poll : (SimpleInput, nat64, nat64) -> (Result_1);
   get_categories : () -> (vec CategoryResult) query;
-  get_category : (nat64) -> (Result_1) query;
-  get_comments : (nat64) -> (Result_2) query;
+  get_category : (nat64) -> (Result_2) query;
+  get_comments : (nat64) -> (Result_3) query;
   get_poll_result : (nat64) -> (Result) query;
   get_polls : (SearchFilter) -> (vec Poll) query;
   vote_poll : (nat64, int8) -> (Result);

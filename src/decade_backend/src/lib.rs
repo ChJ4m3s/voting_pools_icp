@@ -185,7 +185,7 @@ fn get_category(id: u64) -> Result<CategoryResult, Error> {
             None => {
                 Err(Error::NotFound {
                     msg: format!(
-                    "could't update a category with id={}.", id
+                    "could't find a category with id={}.", id
                     ),
                 })
             }
@@ -274,7 +274,7 @@ fn get_polls(filters: SearchFilter) -> Vec<Poll> {
 }
 
 #[ic_cdk::update]
-fn create_poll(poll: SimpleInput, category: u64, validity_period: u64) -> Option<Poll> {
+fn create_poll(poll: SimpleInput, category: u64, validity_period: u64) -> Result<Poll, Error> {
     let id = ID_COUNTER_POLLS.with(|counter| {
         let current_value: u64 = *counter.borrow().get();
         counter.borrow_mut().set(current_value + 1)
@@ -296,9 +296,13 @@ fn create_poll(poll: SimpleInput, category: u64, validity_period: u64) -> Option
                     expiring_date: time() + validity_period
                 };
                 do_insert(&poll);
-                Some(poll)
+                Ok(poll)
             }
-            None => None
+            None => Err(Error::NotFound {
+                msg: format!(
+                "could't find a category with id={}.", category
+                ),
+            })
         }
     })
 }
